@@ -28,7 +28,8 @@ nobody:/nonexistent
 </code></pre>
 <hr>
 <h1 id="git-commit-graph-commands">2. Git Commit Graph Commands</h1>
-<p>We have sent you an image named <code>git_history.v3.png</code> showing a Git commit graph. Below is a sequence of Git commands that could have produced the depicted commit graph:</p>
+<p>We have sent you an image named <code>git_history.v3.png</code> showing a Git commit graph.</p>
+<p>What sequence of Git commands could have produced the commit graph depicted in the image?</p>
 <pre class=" language-bash"><code class="prism  language-bash"><span class="token comment"># 1. Initialize a Git repository</span>
 <span class="token function">git</span> init
 
