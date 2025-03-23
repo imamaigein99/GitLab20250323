@@ -88,68 +88,13 @@ Git integrates easily with CI/CD tools like <strong>GitLab CI/CD</strong>, as we
 <p>Learning Git will increase your productivity and teamwork abilities, regardless of your level of experience as a developer. Are you prepared to use Git’s power? Explore GitLab and begin creating the software of the future right now!</p>
 <hr>
 <h1 id="debugging-a-ussd-service-issue-on-pilot.">4. Debugging a USSD Service Issue on pilot.</h1>
-<h2 id="the-problem"><strong>The Problem</strong></h2>
 <p>I work for a company that provides USSD service (<strong>Unstructured Supplementary Service Data)</strong>. It is a protocol used by mobile phones to communicate with the service provider’s system. Recently, we encountered an issue where some customers were unable to use a specific USSD code hosted for certain banks on our pilot environment. I picked up the ticket and prioritized it.</p>
-<h2 id="investigation-and-debugging-steps"><strong>Investigation and Debugging Steps</strong></h2>
-<ol>
-<li>
-<p><strong>Checked Logs with ELK (Elasticsearch, Logstash, Kibana)</strong></p>
-<ul>
-<li>Verified that the core USSD application was <strong>active and receiving traffic</strong>.</li>
-<li>On the downstream system, i found <strong>database-related errors</strong> in the logs.</li>
-</ul>
-</li>
-<li>
-<p><strong>Analyzed Metrics in Grafana</strong></p>
-<ul>
-<li>Observed error patterns matching those found in ELK logs.</li>
-</ul>
-</li>
-<li>
-<p><strong>Restarted the Application on Node 1</strong></p>
-<ul>
-<li>Found that it <strong>could not connect to KeyDB (our database)</strong>.</li>
-<li>Checked the <strong>KeyDB server</strong> and discovered <strong>disk space was full</strong>.</li>
-</ul>
-</li>
-<li>
-<p><strong>Examined KeyDB Logs</strong></p>
-<ul>
-<li>Confirmed <strong>storage-related failures</strong> as the root cause.</li>
-</ul>
-</li>
-</ol>
-<h2 id="the-fix"><strong>The Fix</strong></h2>
-<ol>
-<li>
-<p>Used <strong>GitLab CI/CD pipeline</strong> to provision <strong>additional disk space</strong> across all three KeyDB nodes.</p>
-</li>
-<li>
-<p>Flushed the database using:</p>
+<p>My first step was to check the logs on our core USSD application using ELK (Elasticsearch, Logstash, Kibana). I verified that the application was up and actively receiving traffic from the Telco (Telecommucation provider). However, upon further investigation, I found database related errors in the logs. To confirm, I checked Grafana and noticed error patterns aligning with those seen in the logs.</p>
+<p>Next, I restarted the application on the first node and observed that it couldn’t connect to one of the KeyDB database nodes. I then checked the DB server and discovered that the disk space was completely filled up. Additionally, I examined the logs for the KeyDB database microservice, which confirmed storage-related failures.</p>
+<p>To resolve this, I used our CI/CD pipeline in GitLab to provision additional disk space across all three KeyDB nodes. After that, I executed the following command to flush the database:</p>
 <pre class=" language-bash"><code class="prism  language-bash">docker <span class="token function">exec</span> -it keydb-keydb-1 keydb-cli -a <span class="token punctuation">{</span>password<span class="token punctuation">}</span> FLUSHALL
-
 </code></pre>
-</li>
-<li>
-<p><strong>Applied necessary KeyDB configurations</strong> and restarted the service.</p>
-</li>
-<li>
-<p>Restarted the USSD application to ensure proper connectivity.</p>
-</li>
-<li>
-<p>Monitored logs and verified that errors were <strong>significantly reduced</strong>.</p>
-</li>
-<li>
-<p>Confirmed successful resolution with test cases.</p>
-</li>
-</ol>
-<h2 id="preventing-future-occurrences"><strong>Preventing Future Occurrences</strong></h2>
-<ul>
-<li><strong>Automated Disk Space Cleanup:</strong> Implemented scheduled database flushing.</li>
-<li><strong>Grafana Alerts:</strong> Set up <strong>email &amp; SMS notifications</strong> for low disk space.</li>
-<li><strong>Documentation:</strong> Created a <strong>knowledge base article</strong> on <strong>Confluence</strong> detailing the issue and resolution.</li>
-</ul>
-<h2 id="the-outcome"><strong>The Outcome</strong></h2>
-<p>By leveraging <strong>ELK, Grafana, and GitLab CI/CD</strong>, I was able to <strong>quickly diagnose and resolve the issue</strong>, restoring service availability and improving customer experience.</p>
+<p>I also applied necessary configuration changes to KeyDB and restarted the service. After ensuring that KeyDB was running optimally, I proceeded to restart the application that connects to it. Upon rechecking, I saw that the initial errors had significantly reduced, and all test cases passed successfully.</p>
+<p>I then went a further step to reduce the possibility of disk space filling by putting in place an automatic procedure to flush data on a regular basis to prevent a future reocurrence and i also added an alert panel on grafana to alert the team via email and sms on Disk space issues, so we can also proactively monitor the disk space usage on our pilot environment. Additionally, I created a knowledge base articule detailing the issue and its resolution on Confluence.</p>
 <hr>
 
